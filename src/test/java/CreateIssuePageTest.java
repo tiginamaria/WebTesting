@@ -1,27 +1,31 @@
+import io.github.bonigarcia.wdm.WebDriverManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 class CreateIssuePageTest {
 
     private static WebDriver driver;
-    private static WebDriverWait wait;
 
     @BeforeAll
     private static void init() {
-        System.setProperty("webdriver.gecko.driver","/home/maria/Загрузки/geckodriver");
-        driver = new FirefoxDriver();
-        wait = new WebDriverWait(driver, 5);
+        WebDriverManager.firefoxdriver().setup();
     }
 
-    @Test
-    void createIssueSuccessTest() {
-        driver.get("http://localhost:8080/login");
-        User user = User.createValidUser();
-        Issue issue = Issue.createValidIssue();
+    @BeforeEach
+    private void initDriver() {
+        driver = new FirefoxDriver();
+    }
 
+    @AfterEach
+    private void closeDriver() {
+        driver.close();
+    }
+
+    private void runSuccessTest(User user, Issue issue) {
         LoginPage loginPage = new LoginPage(driver);
         loginPage
                 .login(user)
@@ -31,12 +35,7 @@ class CreateIssuePageTest {
                 .checkSuccessMessage("was reported");
     }
 
-    @Test
-    void createIssueWithoutSummaryErrorTest() {
-        driver.get("http://localhost:8080/login");
-        User user = User.createValidUser();
-        Issue issue = Issue.createIssueWithoutSummary();
-
+    private void runErrorTest(User user, Issue issue) {
         LoginPage loginPage = new LoginPage(driver);
         loginPage
                 .login(user)
@@ -47,32 +46,84 @@ class CreateIssuePageTest {
     }
 
     @Test
-    void createIssueWithLongSummarySuccessTest() {
+    void createSimpleIssueSuccessTest() {
         driver.get("http://localhost:8080/login");
         User user = User.createValidUser();
-        Issue issue = Issue.createIssueWithLongSummary();
+        Issue issue = Issue.createValidOnelineIssue();
 
-        LoginPage loginPage = new LoginPage(driver);
-        loginPage
-                .login(user)
-                .clickIssues()
-                .clickCreateIssue()
-                .createIssueSuccess(issue)
-                .checkSuccessMessage("was reported");
+        runSuccessTest(user, issue);
     }
 
     @Test
-    void createIssueWithSpecificSymbolsSuccessTest() {
+    void createMultilineIssueSuccessTest() {
         driver.get("http://localhost:8080/login");
         User user = User.createValidUser();
-        Issue issue = Issue.createIssueWithSpecificSymbols();
+        Issue issue = Issue.createValidMultilineIssue();
 
-        LoginPage loginPage = new LoginPage(driver);
-        loginPage
-                .login(user)
-                .clickIssues()
-                .clickCreateIssue()
-                .createIssueSuccess(issue)
-                .checkSuccessMessage("was reported");
+        runSuccessTest(user, issue);
+    }
+
+    @Test
+    void createIssueWithEmptySummaryErrorTest() {
+        driver.get("http://localhost:8080/login");
+        User user = User.createValidUser();
+        Issue issue = Issue.createWithEmptySummary();
+
+        runErrorTest(user, issue);
+    }
+
+    @Test
+    void createIssueEmptyErrorTest() {
+        driver.get("http://localhost:8080/login");
+        User user = User.createValidUser();
+        Issue issue = Issue.createEmpty();
+
+        runErrorTest(user, issue);
+    }
+
+    @Test
+    void createIssueWithEmptyDescriptionSuccessTest() {
+        driver.get("http://localhost:8080/login");
+        User user = User.createValidUser();
+        Issue issue = Issue.createWithEmptyDescription();
+
+        runSuccessTest(user, issue);
+    }
+
+    @Test
+    void createIssueWithLongSummarySuccessTest() {
+        driver.get("http://localhost:8080/login");
+        User user = User.createValidUser();
+        Issue issue = Issue.createWithLongSummary();
+
+        runSuccessTest(user, issue);
+    }
+
+    @Test
+    void createIssueWithLongDescriptioSuccessTest() {
+        driver.get("http://localhost:8080/login");
+        User user = User.createValidUser();
+        Issue issue = Issue.createWithLongDescription();
+
+        runSuccessTest(user, issue);
+    }
+
+    @Test
+    void createIssueWithSpecificSymbolsInSummarySuccessTest() {
+        driver.get("http://localhost:8080/login");
+        User user = User.createValidUser();
+        Issue issue = Issue.createWithSpecificSummarySymbols();
+
+        runSuccessTest(user, issue);
+    }
+
+
+    @Test
+    void createIssueWithSpecificSymbolsInDescriptionSuccessTest() {
+        driver.get("http://localhost:8080/login");
+        User user = User.createValidUser();
+        Issue issue = Issue.createWithSpecificDescriptionSymbols();
+
+        runSuccessTest(user, issue);
     }
 }

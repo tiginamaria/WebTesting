@@ -23,8 +23,8 @@ public class LoginPage {
     }
 
     public DashboardPage login(User user) {
-        this.login.sendKeys(user.login);
-        this.password.sendKeys(user.password);
+        login.sendKeys(user.login);
+        password.sendKeys(user.password);
         loginButton.click();
         return new DashboardPage(driver);
     }
